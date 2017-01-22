@@ -1,7 +1,5 @@
 import numpy as np
 
-# class Error():
-	# def __init__(self):
-		
-def error(x):
-	return 0.5
+
+def error(y_pred, y_true):
+	return np.sum(np.square(true-predicted))/2

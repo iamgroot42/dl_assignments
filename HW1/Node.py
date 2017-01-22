@@ -3,12 +3,13 @@ import numpy as np
 
 class Node():
 	def __init__(self):
-		self.incoming = []
-		self.outgoing = []
+		self.gradient_in = 0.0
 		self.input = None
 		self.output = None
-		self.gradient_in = 0.0
+		self.incoming = []
+		self.outgoing = []
 		self.dropout = False
+		self.param = None
 
 	def func(self, x):
 		return x
@@ -62,54 +63,34 @@ class ReLU(Node):
 		return 1.0 * (x > 0)
 
 
-# class MSE(Node):
-# 	def __init__(self):
-# 		Node.__init__(self)
-
-# 	def func(self, x):
-# 		return np.sum(np.square(true-predicted))/2
-
-
-
-# class Add(Node):
-# 	def __init__(self):
-# 		Node.__init__(self)
+class Multiply(Node):
+	def __init__(self):
+		Node.__init__(self)
 		
-# 	def func(self, x):
-# 		if self.dropout:
-# 			return x * 0.0
-# 		output = np.zeros(self.incoming.output.shape)
-# 		for node in self.incoming:
-# 			output += self.incoming.output
-# 		return output
+	def func(self, x):
+		if self.dropout:
+			return  0.0
+		output = np.sum(self.incoming.output) * self.param
 
-# 	def gradient(self, x, wrt=None):
-# 		if self.dropout:
-# 			return x*  0.0
-# 		return np.ones(np.shape(x))
+	def gradient(self, x, wrt=None):
+		if self.dropout:
+			return 0.0
+		return self.param
 
 
-# class Multiply(Node):
-# 	def __init__(self):
-# 		Node.__init__(self)
+class Add(Node):
+	def __init__(self):
+		Node.__init__(self)
 		
-# 	def func(self, x):
-# 		if self.dropout:
-# 			return x * 0.0
-# 		output = np.ones(self.incoming.output.shape)
-# 		for node in self.incoming:
-# 			output *= self.incoming.output
-# 		return output
+	def func(self, x):
+		if self.dropout:
+			return x * 0.0
+		output = np.zeros(self.incoming.output.shape)
+		for node in self.incoming:
+			output += self.incoming.output
+		return output
 
-# 	def gradient(self, x, wrt=None):
-# 		if self.dropout:
-# 			return 0.0
-# 		gradient = np.ones(self.incoming.output.shape, dtype=bool)
-# 		exclude_node = 0
-# 		for node in self.incoming:
-# 			if node == wrt:
-# 				break
-# 			exclude_node += 1
-# 		gradient[exclude_node] = 0
-# 		return np.prod(gradient)
-
+	def gradient(self, x, wrt=None):
+		if self.dropout:
+			return x * 0.0
+		return np.ones(np.shape(x))

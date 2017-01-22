@@ -7,6 +7,25 @@ class Layer():
 		self.is_input_layer = is_input_layer
 		self.is_output_layer = is_output_layer
 
+	def same_layer(self, node, count):
+		for _ in range(count):
+			self.node.append(node())
+
+	def clear(self):
+		if self.is_input_layer:
+			for node in self.nodes:
+				node.gradient_in = 0.0
+				node.output = None
+		elif self.is_output_layer:
+			for node in self.nodes:
+				node.gradient_in = 0.0
+				node.input = None
+		else:
+			for node in self.nodes:
+				node.gradient_in = 0.0
+				node.input = None
+				node.output = None
+
 	def forward_pass(self):
 		for node in self.nodes:
 			node.forward_prop()

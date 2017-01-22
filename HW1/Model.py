@@ -26,13 +26,18 @@ class Model():
 		for layer in self.layers:
 			layer.backward_pass()
 
+	def one_iter(self):
+		self.forward_pass()
+		self.backward_pass()
+		for layer in self.layers[1:-1]:
+			layer.clear()
+
 	def train(self):
 		assert len(self.layers) >= 2
 		self.layers[0].load_input_data(self.X_train)
 		self.layers[-1].load_output_data(self.Y_train)
 		for i in range(self.iters):
-			self.forward_pass()
-			self.backward_pass()
+			self.one_iter()
 
 	def test(self):
 		self.data = self.X_test
