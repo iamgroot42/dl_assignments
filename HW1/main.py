@@ -1,6 +1,9 @@
 # from keras.datasets import mnist
 import numpy as np
 from Node import Sigmoid
+from Layer import Layer
+from Model import Model
+from Error import error
 
 
 if __name__ == "__main__":
@@ -10,11 +13,15 @@ if __name__ == "__main__":
 	z = Sigmoid()
 	x.add_node(z)
 	y.add_node(z)
-	x.input = 2.0
-	y.input = 3.0
-	x.forward_prop()
-	y.forward_prop()
-	z.gradient_in = 1.0
-	z.back_prop()
-	print z.input
-	print x.gradient_in, y.gradient_in
+	l1 = Layer()
+	l2 = Layer()
+	m = Model(error)
+	l1.add_node(x)
+	l1.add_node(y)
+	l2.add_node(z)
+	m.add_layer(l1)
+	m.add_layer(l2)
+	data = np.array([[2.0, 3.0],[3.0, 2.0]])
+	labels = np.array([[0.0],[1.0]])
+	m.load_data(data, labels, data, labels)
+	m.train()

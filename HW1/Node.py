@@ -5,20 +5,22 @@ class Node():
 	def __init__(self):
 		self.incoming = []
 		self.outgoing = []
-		self.input = np.zeros(())
-		self.output = np.zeros(())
-		self.gradient_in = np.zeros(())
+		self.input = None
+		self.output = None
+		self.gradient_in = 0.0
 		self.dropout = False
 
 	def func(self, x):
-		return
+		return x
 
 	def gradient(self, x, wrt=None):
-		return
+		return x * 0.0
 
 	def forward_prop(self):
 		self.output = self.func(self.input)
 		for outgoing_node in self.outgoing:
+			if outgoing_node.input is None:
+				outgoing_node.input = np.zeros(self.output.shape)
 			outgoing_node.input += self.output
 
 	def back_prop(self):
