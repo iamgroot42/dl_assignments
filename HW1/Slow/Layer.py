@@ -7,9 +7,9 @@ class Layer():
 		self.is_input_layer = is_input_layer
 		self.is_output_layer = is_output_layer
 
-	def create_layer(self, node, count):
+	def create_layer(self, this_node, count):
 		for _ in range(count):
-			self.node.append(node())
+			self.nodes.append(this_node())
 
 	def clear(self):
 		if self.is_input_layer:
@@ -27,12 +27,18 @@ class Layer():
 				node.output = None
 
 	def forward_pass(self):
+		i = 1
 		for node in self.nodes:
+			# print i
 			node.forward_prop()
+			i += 1
 
-	def backward_pass(self):	
+	def backward_pass(self):
+		i = 1
 		for node in self.nodes:
+			# print i
 			node.back_prop()
+			i += 1
 
 	def load_input_data(self, data):
 		assert data.shape[1] == len(self.nodes)
@@ -58,3 +64,8 @@ class Layer():
 				node.momentum *= gamma
 				node.momentum += alpha * node.gradient_in
 				node.param -= node.momentum
+
+	def join_layer(self, layer):
+		for incoming in self.nodes:
+			for outgoing in layer.nodes:
+				incoming.add_node(outgoing)

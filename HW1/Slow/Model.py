@@ -37,11 +37,15 @@ class Model():
 			layer.update_weights(self.gamma, self.learning_rate)
 
 	def one_iter(self):
+		print "forward pass"
 		self.forward_pass()
+		print "backward pass"
 		self.backward_pass()
+		print "update pass"
 		self.update_weights()
 		for layer in self.layers:
 			layer.clear()
+		print self.error.func_error(self.layers[-1])
 
 	def train(self):
 		for i in range(self.iters):
@@ -52,5 +56,5 @@ class Model():
 		self.layers[0].load_input_data(self.X_test)
 		self.layers[-1].load_output_data(self.Y_test)
 		self.forward_pass()
-		accuracy = error.error(self.layers[-1])
+		accuracy = error.func_error(self.layers[-1])
 		return accuracy

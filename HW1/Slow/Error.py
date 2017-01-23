@@ -4,7 +4,7 @@ class Error():
 	def __init__(self):
 		self.error = 0.0
 
-	def error(self, last_layer):
+	def func_error(self, last_layer):
 		for node in last_layer.nodes:
 			self.error += np.sum(np.square(node.input-node.output))/2
 		return error
