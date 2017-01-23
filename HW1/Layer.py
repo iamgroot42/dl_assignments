@@ -7,7 +7,7 @@ class Layer():
 		self.is_input_layer = is_input_layer
 		self.is_output_layer = is_output_layer
 
-	def same_layer(self, node, count):
+	def create_layer(self, node, count):
 		for _ in range(count):
 			self.node.append(node())
 
@@ -39,6 +39,7 @@ class Layer():
 		self.is_input_layer = True
 		for i in range(len(self.nodes)):
 			self.nodes[i].input = data[:,i]
+			self.nodes[i].output = data[:,i]
 
 	def load_output_data(self, data):
 		assert data.shape[1] == len(self.nodes)
@@ -48,3 +49,12 @@ class Layer():
 
 	def add_node(self, node):
 		self.nodes.append(node)
+
+	def update_weights(self, gamma, alpha):
+		for node in self.nodes:
+			if node.param:
+				if node.momentum is None:
+					node.momentum = 0.0
+				node.momentum *= gamma
+				node.momentum += alpha * node.gradient_in
+				node.param -= node.momentum
