@@ -1,49 +1,51 @@
 import numpy as np
-
+from helpers import sigmoid
 
 class Layer():
-	def __init__(self, weight_shape=None):
-		if weight_shape:
-			self.weights = np.zeros(weight_shape)
-			self.output = np.zeros(weight_shape)
+	def __init__(self, weight_shape):
+		self.weights = np.random.rand(weight_shape[0], weight_shape[1])
+		self.output = np.zeros(weight_shape)
 		self.gradient = None
 		self.dropout = 0.0
 		self.momentum = 0.0
 
-	def derivative(self, x):
-		return self.weights
+	def activation(self, x):
+		return x
+
+	def activation_grad(self, x):
+		return 1.0
+
+	def backward(self, x):
+		self.gradient = np.transpose(self.weights)
+		return self.gradient
 
 	def forward(self, input_data):
-		print input_data.shape
-		print self.weights.shape
 		self.output = input_data * self.weights
 		return self.output
-
-	def random_init(self):
-		self.weights = np.random.rand(self.weights.shape)
 
 
 class Sigmoid(Layer):
 	def __init__(self, weight_shape):
 		Layer.__init__(self, weight_shape)
 
-	def derivative(self, x):
-		self.gradient = (1 / ( 1 + np.exp(-x))) * (1  - (1 / ( 1 + np.exp(-x))))
-		return self.gradient
-
-	def forward(self, input_data):
-		self.output = 1 / ( 1 + np.exp(-input_data))
+	def activation(self, x):
+		self.output = sigmoid(x)
 		return self.output
+
+	def activation_grad(self, x):
+		self.gradient = np.multiply(sigmoid(x), 1 - sigmoid(x))
+		return self.gradient
 
 
 class ReLU(Layer):
 	def __init__(self, weight_shape):
 		Layer.__init__(self, weight_shape)
-	
-	def derivative(self, x):
+
+	def activation(self, x):
+		self.output = np.maximum(x, 0.0)
+		return self.output
+
+	def activation_grad(self, x):
 		self.gradient = 1.0 * (x > 0)
 		return self.gradient
 
-	def func(self, input_data):
-		self.output = np.maximum(input_data, 0.0)
-		return self.output

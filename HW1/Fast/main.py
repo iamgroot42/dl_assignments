@@ -19,6 +19,7 @@ if __name__ == "__main__":
 	y_train = np.matrix(y_train)
 	m = Model(Error())
 	m.add_layer(Layer((784,100)))
-	m.add_layer(Sigmoid((100,100)))
+	# m.add_layer(Sigmoid((100,100)))
 	m.add_layer(Layer((100,10)))
+	m.add_layer(Layer((10,1)))
 	m.train(X_train, y_train)
