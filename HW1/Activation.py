@@ -1,11 +1,12 @@
 import numpy as np
 
+
 class Linear():
 	def func(self, x):
 		return x
 
 	def gradient(self, x):
-		return (x * 0.0) + 1.0
+		return np.ones(x.shape)
 
 
 class Sigmoid():
@@ -13,7 +14,7 @@ class Sigmoid():
 		return 1.0 / ( 1 + np.exp(-x))
 
 	def gradient(self, x):
-		return self.func(x) * ( 1 - self.func(x))
+		return np.multiply(self.func(x),  1 - self.func(x))
 
 
 class ReLU():
@@ -22,3 +23,9 @@ class ReLU():
 
 	def gradient(self, x):
 		return 1.0 * (x > 0)
+
+
+class SoftMax():
+	def func(self, X):
+		norm_X = X - X.mean()
+		return np.exp(X) / np.sum(np.exp(X))

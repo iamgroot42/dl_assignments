@@ -6,3 +6,6 @@ class Error():
 
 	def gradient(self, Y, Y_cap):
 		return -(Y - Y_cap)
+
+	def pred_error(self, Y, Y_cap):
+		return 1 * (np.argmax(Y_cap) != np.argmax(Y))
