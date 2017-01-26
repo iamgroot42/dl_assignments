@@ -35,8 +35,8 @@ def single_layer(X_train, X_test, y_train, y_test, verbose=False):
 
 def multi_layer(X_train, X_test, y_train, y_test, verbose=False):
 	m = Model(Error())
-	# m.add_layer(Layer((784,100), Sigmoid()))
-	m.add_layer(Layer((784,100), ReLU()))
+	m.add_layer(Layer((784,100), Sigmoid()))
+	# m.add_layer(Layer((784,100), ReLU()))
 	m.add_layer(Layer((100,10), SoftMax()))
 	t_acc = (1-m.train(X_train, y_train, verbose)) * 100
         print "Train accuracy", t_acc, "%"

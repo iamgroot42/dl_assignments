@@ -3,10 +3,10 @@ from Layer import Layer
 
 
 class Model():
-	def __init__(self, error, learning_rate = 1e-3, gamma = 0.5, batch_size = 128, iters=5):
+	def __init__(self, error, learning_rate = 1e-3, gamma = 0.5, batch_size = 128, max_iters=50):
 		self.layers = []
 		self.error = error
-		self.iters = iters
+		self.max_iters = max_iters
 		self.learning_rate = learning_rate
 		self.gamma = gamma
 		self.batch_size = batch_size
@@ -51,15 +51,22 @@ class Model():
 			total_error = 0.0
 			X_batch = X_train[i: i+self.batch_size]
 			Y_batch = Y_train[i: i+self.batch_size]
-			for j in range(self.batch_size):
+			prev_error = 1.0
+			num_iters = 0
+			for _ in range(self.max_iters):
 				batch_pass_error = 0.0
-				self.X = X_batch[j]
-				self.Y = Y_batch[j]
-				for _ in range(self.iters):
-					batch_pass_error += self.one_iter()
-				batch_pass_error /= float(self.iters)
-				total_error += batch_pass_error
-			total_error /= float(self.batch_size)
+				for j in range(self.batch_size):
+					self.X = X_batch[j]
+					self.Y = Y_batch[j]
+					error = self.one_iter()
+					batch_pass_error += error
+				batch_pass_error /= float(self.batch_size)
+				num_iters += 1
+				if prev_error - batch_pass_error <= 0.001:
+					break
+				prev_error = batch_pass_error
+			total_error += batch_pass_error
+			total_error /= float(num_iters)
 			training_accuracy += total_error
 			num_batches += 1
 			if verbose:
