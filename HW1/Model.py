@@ -45,10 +45,12 @@ class Model():
 		return self.error.pred_error(self.Y, self.Y_cap)
 
 	def train(self, X_train, Y_train, verbose=False):
-		for i in range(0,len(X_train),self.batch_size):
+		training_accuracy = 0.0
+		num_batches = 0
+		for i in range(0,len(X_train)-self.batch_size,self.batch_size):
 			total_error = 0.0
-			X_batch = X_train[i: i+self.batch_size] 
-			Y_batch = Y_train[i: i+self.batch_size] 
+			X_batch = X_train[i: i+self.batch_size]
+			Y_batch = Y_train[i: i+self.batch_size]
 			for j in range(self.batch_size):
 				batch_pass_error = 0.0
 				self.X = X_batch[j]
@@ -58,8 +60,11 @@ class Model():
 				batch_pass_error /= float(self.iters)
 				total_error += batch_pass_error
 			total_error /= float(self.batch_size)
+			training_accuracy += total_error
+			num_batches += 1
 			if verbose:
 				print "Accuracy for this batch", (1-total_error) * 100, "%"
+		return training_accuracy / float(num_batches)
 
 	def test(self, X_test, y_test):
 		total_acc = 0.0
