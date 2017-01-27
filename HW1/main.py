@@ -27,7 +27,7 @@ def process_data():
 
 def single_layer(X_train, X_test, y_train, y_test, verbose=False):
 	m = Model(Error())
-	m.add_layer(Layer((784,10), SoftMax()))
+	m.add_layer(Layer((784,10), SoftMax(), dropout=0.2))
 	t_acc = (1-m.train(X_train, y_train, verbose)) * 100
 	print "Train accuracy", t_acc, "%"
 	print "Test accuracy", (1-m.test(X_test, y_test)) * 100, "%"
@@ -36,8 +36,8 @@ def single_layer(X_train, X_test, y_train, y_test, verbose=False):
 def multi_layer(X_train, X_test, y_train, y_test, verbose=False):
 	m = Model(Error())
 	# m.add_layer(Layer((784,100), Sigmoid()))
-	m.add_layer(Layer((784,100), ReLU()))
-	m.add_layer(Layer((100,10), SoftMax()))
+	m.add_layer(Layer((784,100), ReLU(), dropout=0.2))
+	m.add_layer(Layer((100,10), SoftMax(), dropout=0.2))
 	t_acc = (1-m.train(X_train, y_train, verbose)) * 100
         print "Train accuracy", t_acc, "%"
 	print "Test accuracy", (1-m.test(X_test, y_test)) * 100, "%"
@@ -45,4 +45,4 @@ def multi_layer(X_train, X_test, y_train, y_test, verbose=False):
 
 if __name__ == "__main__":
 	(X_train, y_train), (X_test, y_test) = process_data()
-	multi_layer(X_train, X_test, y_train, y_test, True)
+	single_layer(X_train, X_test, y_train, y_test, True)

@@ -15,8 +15,10 @@ class Model():
 		self.layers.append(layer)
 
 	def forward_pass(self):
+		self.layers[0].gen_dropout()
 		self.layers[0].forward(self.X)
 		for i in range(1,len(self.layers)):
+			self.layers[i].gen_dropout()
 			self.layers[i].forward(self.layers[i-1].output)
 		self.Y_cap = self.layers[-1].activation.func(self.layers[-1].output)
 
@@ -24,19 +26,19 @@ class Model():
 		self.layers[-1].gradient  = self.error.gradient(self.Y, self.Y_cap).T
 		for i in range(len(self.layers)-2,-1,-1):
 			activation_gradient = self.layers[i].activation.gradient(self.layers[i].output).T
-			second_term = self.layers[i+1].weights * self.layers[i+1].gradient
+			second_term = np.multiply(self.layers[i+1].weights, self.layers[i+1].dropout_mask) * self.layers[i+1].gradient
 			self.layers[i].gradient = np.multiply(activation_gradient, second_term)
 
 	def update_weights(self):
 		gradient = self.layers[0].gradient * self.X
 		self.layers[0].momentum *= self.gamma
 		self.layers[0].momentum += self.learning_rate * (gradient.T)
-		self.layers[0].weights -= self.layers[0].momentum
+		self.layers[0].weights -= np.multiply(self.layers[0].momentum, self.layers[0].dropout_mask)
 		for i in range(1,len(self.layers)):
 			gradient = self.layers[i].gradient * self.layers[i-1].activation.func(self.layers[i-1].output)
 			self.layers[i].momentum *= self.gamma
 			self.layers[i].momentum += self.learning_rate * (gradient.T)
-			self.layers[i].weights -= self.layers[i].momentum
+			self.layers[i].weights -= np.multiply(self.layers[i].momentum, self.layers[i].dropout_mask)
 
 	def one_iter(self):
 		self.forward_pass()
