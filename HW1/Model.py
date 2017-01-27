@@ -75,7 +75,11 @@ class Model():
 				print "Accuracy for this batch", (1-total_error) * 100, "%"
 		return training_accuracy / float(num_batches)
 
-	def test(self, X_test, y_test):
+	def test(self, X_test, y_test, dropout=False):
+		if dropout:
+			for layer in self.layers:
+				layer.dropout = dropout
+				layer.gen_dropout()
 		total_acc = 0.0
 		for i in range(len(X_test)):
 			self.X = X_test[i]

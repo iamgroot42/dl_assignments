@@ -14,6 +14,7 @@ class Layer():
 		self.dropout = dropout
 		self.momentum = 0.0
 		self.activation = activation
+
 	def forward(self, input_data):
 		if self.dropout:
 			self.output = input_data * np.multiply(self.weights, self.dropout_mask)

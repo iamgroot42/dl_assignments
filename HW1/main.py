@@ -34,15 +34,25 @@ def single_layer(X_train, X_test, y_train, y_test, verbose=False):
 
 
 def multi_layer(X_train, X_test, y_train, y_test, verbose=False):
-	m = Model(Error())
-	# m.add_layer(Layer((784,100), Sigmoid()))
-	m.add_layer(Layer((784,100), ReLU(), dropout=0.2))
-	m.add_layer(Layer((100,10), SoftMax(), dropout=0.2))
-	t_acc = (1-m.train(X_train, y_train, verbose)) * 100
-        print "Train accuracy", t_acc, "%"
-	print "Test accuracy", (1-m.test(X_test, y_test)) * 100, "%"
+	dropout_params = [None, 0.1, 0.2, 0.4]
+	batch_sizes = [128, 256, 512]
+	learning_rates = [1e-2, 1e-3, 1e-4, 1e-5]
+	momentum_rates = [0.125, 0.25, 0.5]
+	for dropout_param in dropout_params:
+		for batch_size in batch_sizes:
+			for learning_rate in learning_rates:
+				for momentum_rate in momentum_rates:
+					m = Model(Error(), learning_rate, momentum_rate, batch_size)
+					m.add_layer(Layer((784,100), Sigmoid(), dropout=dropout_param))
+					# m.add_layer(Layer((784,100), ReLU(), dropout=dropout_param))
+					m.add_layer(Layer((100,10), SoftMax(), dropout=dropout_param))
+					t_acc = (1-m.train(X_train, y_train, verbose)) * 100
+					print "(", dropout_param, ",", batch_size, ",", learning_rate, ",", momentum_rate, ")"
+					print "Train accuracy", t_acc, "%"
+					print "Test accuracy", (1-m.test(X_test, y_test, 0.3)) * 100, "%"
+					print "-------------"
 
 
 if __name__ == "__main__":
 	(X_train, y_train), (X_test, y_test) = process_data()
-	single_layer(X_train, X_test, y_train, y_test, True)
+	multi_layer(X_train, X_test, y_train, y_test, False)
