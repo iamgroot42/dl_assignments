@@ -15,5 +15,16 @@ flags.DEFINE_integer('nb_epochs', 50, 'Number of epochs to train model')
 flags.DEFINE_integer('batch_size', 128, 'Batch size')
 flags.DEFINE_float('learning_rate', 0.01, 'Learning rate for training')
 
+
+def autoencoder():
+	model = Sequential()
+	return model
+
+
+def CNN():
+	model = Sequential()
+	return model
+
+
 if __name__ == "__main__":
-	print "main"
+
