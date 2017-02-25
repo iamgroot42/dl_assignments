@@ -16,15 +16,41 @@ flags.DEFINE_integer('batch_size', 128, 'Batch size')
 flags.DEFINE_float('learning_rate', 0.01, 'Learning rate for training')
 
 
-def autoencoder():
+def plainAutoencoder():
 	model = Sequential()
 	return model
 
 
-def CNN():
+def volumeAutoencoder():
 	model = Sequential()
+	return model
+
+
+def plainCNN():
+	model = Sequential()
+	# model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same', input_shape=(3, 32, 32)))
+	return model
+
+
+def volumeCNN():
+	model = Sequential()
+	model.add(Convolution2D(16, 2, 2, activation='relu', input_shape=(13, 13, 13)))
+	model.add(Convolution2D(32, 3, 3, activation='relu'))
+	model.add(MaxPooling2D((2, 2)))
+	model.add(Convolution2D(64, 3, 3, activation='relu'))
+	model.add(Flatten())
+	model.add(Dropout(0.25))
+	model.add(Dense(256))
+	model.add(Activation('relu'))
+	model.add(Dropout(0.25))
+	model.add(Dense(64))
+	model.add(Activation('relu'))
+	model.add(Dropout(0.5))
+	model.add(Dense(3))
+	model.add(Activation('softmax'))
+	model.compile(loss='categorical_crossentropy',optimizer='rmsprop', metrics=['accuracy'])
 	return model
 
 
 if __name__ == "__main__":
-
+	m = volumeCNN()
