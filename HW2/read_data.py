@@ -3,7 +3,8 @@ import numpy as np
 
 
 def get_data(base_dir='Data/', splice=False):
-	train_data = h5py.File(base_dir + 'train_540k.mat').get('training')[0]
+	return np.load(base_dir + "X.npy")
+	train_data = h5py.File(base_dir + 'train_540k.mat').get('training')[:]
 	if splice:
 		train_data = train_data.reshape(13, 13, 13*540000)
 	else:
@@ -28,6 +29,7 @@ def split_data(X, y, split=0.8):
 
 
 def get_labels(base_dir='Data/'):
+	return np.load(base_dir + "y.npy")
 	label_csf = h5py.File(base_dir + 'label_csf.mat').get('label_csf')[0]
 	label_wm = h5py.File(base_dir + 'label_wm.mat').get('label_wm')[0]
 	label_gm = h5py.File(base_dir + 'label_gm.mat').get('label_gm')[0]
@@ -44,5 +46,5 @@ def load_data(base_dir='Data/', split=0.8):
 
 
 if __name__ == "__main__":
-	# X = get_data()
+	X = get_data()
 	y = get_labels()
