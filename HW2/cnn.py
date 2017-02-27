@@ -1,19 +1,8 @@
-# Tensorflow bug fix while importing keras
-import tensorflow as tf
-tf.python.control_flow_ops = tf
-from tensorflow.python.platform import flags
-
 import keras
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten, Input
 from keras.layers import Convolution2D, MaxPooling2D
-
-FLAGS = flags.FLAGS
-
-flags.DEFINE_integer('nb_epochs', 50, 'Number of epochs to train model')
-flags.DEFINE_integer('batch_size', 128, 'Batch size')
-flags.DEFINE_float('learning_rate', 0.01, 'Learning rate for training')
 
 
 def plainAutoencoder():
@@ -48,7 +37,9 @@ def volumeCNN():
 	model.add(Dropout(0.5))
 	model.add(Dense(3))
 	model.add(Activation('softmax'))
-	model.compile(loss='categorical_crossentropy',optimizer='rmsprop', metrics=['accuracy'])
+	model.compile(loss='categorical_crossentropy',
+		optimizer=keras.optimizers.Adadelta(lr=0.01, rho=0.95, epsilon=1e-08, decay=0.0),
+		metrics=['accuracy'])
 	return model
 
 

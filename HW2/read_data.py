@@ -7,24 +7,26 @@ def get_data(base_dir='Data/', splice=False):
 	train_data = h5py.File(base_dir + 'train_540k.mat').get('training')[:]
 	if splice:
 		train_data = train_data.reshape(13, 13, 13*540000)
+		train_data = np.transpose(train_data,(2,0,1))
 	else:
 		train_data = train_data.reshape(13, 13, 13, 540000)
+		train_data = np.transpose(train_data,(3,0,1,2))
 	return train_data
 
 
 def split_data(X, y, split=0.8):
-	train_examples = X.shape[-1] * split
+	train_examples = int(X.shape[-1] * split)
 	if len(X.shape) == 3:
-		X_train = X[:,:,:train_examples]
-		X_test = X[:,:,train_examples:]
+		X_train = X[:train_examples,:,:]
+		X_test = X[train_examples:,:,:]
 		y = np.repeat(y, 13, 0)
-		y_train = y[:,:train_examples]
-		y_test = y[:,train_examples:]
+		y_train = y[:train_examples,:]
+		y_test = y[train_examples:,:]
 	else:
-		X_train = X[:,:,:,:train_examples]
-		X_test = X[:,:,:,train_examples:]
-		y_train = y[:,:train_examples]
-		y_test = y[:,train_examples:]
+		X_train = X[:train_examples,:,:,:]
+		X_test = X[train_examples:,:,:,:]
+		y_train = y[:train_examples,:]
+		y_test = y[train_examples:,:]
 	return X_train, y_train, X_test, y_test
 
 
