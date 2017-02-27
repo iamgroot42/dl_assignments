@@ -11,14 +11,16 @@ def get_data(base_dir='Data/', splice=False):
 	if splice:
 		train_data = train_data.reshape(13, 13, 13*540000)
 		train_data = np.transpose(train_data,(2,0,1))
+		train_data = np.lib.pad(train_data, ((0,0),(3,0),(3,0)), 'constant', constant_values=(0))
 	else:
 		train_data = train_data.reshape(13, 13, 13, 540000)
 		train_data = np.transpose(train_data,(3,0,1,2))
+		train_data = train_data = np.lib.pad(train_data, ((0,0),(3,0),(3,0),(3,0)), 'constant', constant_values=(0))
 	return train_data
 
 
 def split_data(X, y, split=0.8):
-	train_examples = int(X.shape[-1] * split)
+	train_examples = int(X.shape[0] * split)
 	if len(X.shape) == 3:
 		X_train = X[:train_examples,:,:]
 		X_test = X[train_examples:,:,:]

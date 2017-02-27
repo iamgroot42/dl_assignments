@@ -3,24 +3,19 @@ import keras
 from keras.optimizers import Adadelta
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation, Flatten, Input
-from keras.layers import Convolution2D, Convolution3D, MaxPooling2D, UpSampling2D, ZeroPadding2D
+from keras.layers import Convolution2D, Convolution3D, MaxPooling2D, MaxPooling3D, UpSampling2D, UpSampling3D, ZeroPadding2D
 
 
 def plainAutoencoder(X_train, X_test, learning_rate=1.0):
-	padding = {
-		'top_pad':2,
-		'bottom_pad':1,
-		'left_pad':2,
-		'right_pad':1
-	}
-	input_img = Input(shape=(13, 13, 13))
-	x = ZeroPadding2D(padding=padding)(input_img)
+	input_img = Input(shape=(16, 16, 16))
+	x = Convolution2D(20, 3, 3, activation='relu', border_mode='same')(input_img)
+	x = MaxPooling2D((2, 2), border_mode='same')(x)
 	print x.get_shape()
-	x = Convolution2D(16, 3, 3, activation='relu', border_mode='same')(x)
+	exit()
+	x = Convolution2D(10, 3, 3, activation='relu', border_mode='same')(x)
 	x = MaxPooling2D((2, 2), border_mode='same')(x)
-	x = Convolution2D(8, 3, 3, activation='relu', border_mode='same')(x)
+	x = Convolution2D(5, 3, 3, activation='relu', border_mode='same')(x)
 	x = MaxPooling2D((2, 2), border_mode='same')(x)
-	x = Convolution2D(8, 3, 3, activation='relu', border_mode='same')(x)
 	encoded = MaxPooling2D((2, 2), border_mode='same')(x)
 	x = Convolution2D(8, 3, 3, activation='relu', border_mode='same')(encoded)
 	x = UpSampling2D((2, 2))(x)
@@ -59,6 +54,7 @@ def plainAutoencoder(X_train, X_test, learning_rate=1.0):
 
 def volumeAutoencoder(X_train, X_test):
 	model = Sequential()
+	# model.add(Convolutional3D
 	return model
 
 

@@ -15,6 +15,7 @@ flags.DEFINE_float('learning_rate', 0.0001, 'Learning rate for training')
 
 if __name__ == "__main__":
 	xtr, ytr, xte, yte = read_data.load_data()
+	print xtr.shape
 	# m = cnn.volumeCNN()
 	# m.fit(xtr, ytr,
 	# 	nb_epoch=FLAGS.nb_epochs,
