@@ -3,10 +3,10 @@ import numpy as np
 
 
 def get_data(base_dir='Data/', splice=False):
-	if not splice:
-		return np.load(base_dir + "X.npy")
-	else:
-		return np.load(base_dir + "X_splice.npy")
+	#if not splice:
+	#	return np.load(base_dir + "X.npy")
+	#else:
+	#	return np.load(base_dir + "X_splice.npy")
 	train_data = h5py.File(base_dir + 'train_540k.mat').get('training')[:]
 	if splice:
 		train_data = train_data.reshape(13, 13, 13*540000)
@@ -38,10 +38,10 @@ def split_data(X, y, split=0.8):
 
 
 def get_labels(base_dir='Data/', splice=False):
-	if not splice:
-		return np.load(base_dir + "y.npy")
-	else:
-		return np.load(base_dir + "y_splice.npy")
+	#if not splice:
+	#	return np.load(base_dir + "y.npy")
+	#else:
+	#k	return np.load(base_dir + "y_splice.npy")
 	label_csf = h5py.File(base_dir + 'label_csf.mat').get('label_csf')[0]
 	label_wm = h5py.File(base_dir + 'label_wm.mat').get('label_wm')[0]
 	label_gm = h5py.File(base_dir + 'label_gm.mat').get('label_gm')[0]
@@ -52,11 +52,11 @@ def get_labels(base_dir='Data/', splice=False):
 
 
 def load_data(base_dir='Data/', split=0.8):
-	X = get_data()
+	X = get_data(True)
 	y = get_labels()
 	return split_data(X, y, split)
 
 
 if __name__ == "__main__":
 	X = get_data()
-	y = get_labels()
+	#y = get_labels(True)
