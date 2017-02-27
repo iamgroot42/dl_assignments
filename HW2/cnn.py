@@ -1,16 +1,63 @@
 import keras
 
-from keras.models import Sequential
+from keras.optimizers import Adadelta
+from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation, Flatten, Input
-from keras.layers import Convolution2D, MaxPooling2D
+from keras.layers import Convolution2D, Convolution3D, MaxPooling2D, UpSampling2D, ZeroPadding2D
 
 
-def plainAutoencoder():
-	model = Sequential()
+def plainAutoencoder(X_train, X_test, learning_rate=1.0):
+	padding = {
+		'top_pad':2,
+		'bottom_pad':1,
+		'left_pad':2,
+		'right_pad':1
+	}
+	input_img = Input(shape=(13, 13, 13))
+	x = ZeroPadding2D(padding=padding)(input_img)
+	print x.get_shape()
+	x = Convolution2D(16, 3, 3, activation='relu', border_mode='same')(x)
+	x = MaxPooling2D((2, 2), border_mode='same')(x)
+	x = Convolution2D(8, 3, 3, activation='relu', border_mode='same')(x)
+	x = MaxPooling2D((2, 2), border_mode='same')(x)
+	x = Convolution2D(8, 3, 3, activation='relu', border_mode='same')(x)
+	encoded = MaxPooling2D((2, 2), border_mode='same')(x)
+	x = Convolution2D(8, 3, 3, activation='relu', border_mode='same')(encoded)
+	x = UpSampling2D((2, 2))(x)
+	x = Convolution2D(8, 3, 3, activation='relu', border_mode='same')(x)
+	x = UpSampling2D((2, 2))(x)
+	x = Convolution2D(16, 3, 3, activation='relu', border_mode='same')(x)
+	x = UpSampling2D((2, 2))(x)
+	decoded = Convolution2D(3, 3, 3, activation='sigmoid', border_mode='same')(x)
+	encoder = Model(input=input_img, output=encoded)
+	autoencoder = Model(input=input_img, output=decoded)
+	# Configure autoencoder
+	autoencoder.compile(loss='binary_crossentropy',optimizer=Adadelta(lr=learning_rate, rho=0.95, epsilon=1e-08, decay=0.0)
+, metrics=['accuracy'])
+	autoencoder.fit(X_train, X_train,
+				nb_epoch=100,
+				batch_size=256,
+				validation_split=0.2)
+	score = autoencoder.evaluate(X_test, X_test)[1]
+	print("\nAutoencoder accuracy: " + str(score))
+	# Build ultimate model
+	for i in encoder.layers:
+		i.trainable = False
+	final_model = Sequential()
+	final_model.add(encoder)
+	final_model.add(Flatten())
+	final_model.add(Dense(256))
+	final_model.add(Activation('relu'))
+	final_model.add(Dropout(0.2))
+	final_model.add(Dense(64))
+	final_model.add(Activation('relu'))
+	final_model.add(Dropout(0.2))
+	final_model.add(Dense(3))
+	final_model.add(Activation('softmax'))
 	return model
 
 
-def volumeAutoencoder():
+def volumeAutoencoder(X_train, X_test):
 	model = Sequential()
 	return model
 
@@ -30,7 +77,7 @@ def volumeCNN():
 	model.add(Flatten())
 	model.add(Dropout(0.25))
 	model.add(Dense(256))
-	model.add(Activation('relu'))
+	model.add(Activation('sigmoid'))
 	model.add(Dropout(0.25))
 	model.add(Dense(64))
 	model.add(Activation('relu'))
