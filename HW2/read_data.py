@@ -12,24 +12,26 @@ def get_data(base_dir='Data/', splice=False):
 		train_data = train_data.reshape(13, 13, 13*540000)
 		train_data = np.transpose(train_data,(2,0,1))
 		train_data = np.lib.pad(train_data, ((0,0),(3,0),(3,0)), 'constant', constant_values=(0))
+                train_data = np.expand_dims(train_data, axis=1)
 	else:
 		train_data = train_data.reshape(13, 13, 13, 540000)
 		train_data = np.transpose(train_data,(3,0,1,2))
-		train_data = train_data = np.lib.pad(train_data, ((0,0),(3,0),(3,0),(3,0)), 'constant', constant_values=(0))
+		train_data = np.lib.pad(train_data, ((0,0),(3,0),(3,0),(3,0)), 'constant', constant_values=(0))
+	        train_data = np.expand_dims(train_data, axis=1)
 	return train_data
 
 
 def split_data(X, y, split=0.8):
 	train_examples = int(X.shape[0] * split)
 	if len(X.shape) == 3:
-		X_train = X[:train_examples,:,:]
-		X_test = X[train_examples:,:,:]
+		X_train = X[:train_examples,:]
+		X_test = X[train_examples:,:]
 		y = np.repeat(y, 13, 0)
 		y_train = y[:train_examples,:]
 		y_test = y[train_examples:,:]
 	else:
-		X_train = X[:train_examples,:,:,:]
-		X_test = X[train_examples:,:,:,:]
+		X_train = X[:train_examples,:]
+		X_test = X[train_examples:,:]
 		y_train = y[:train_examples,:]
 		y_test = y[train_examples:,:]
 	return X_train, y_train, X_test, y_test

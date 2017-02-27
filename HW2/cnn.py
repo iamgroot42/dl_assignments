@@ -1,5 +1,8 @@
 import keras
 
+from keras import backend as K
+K.set_image_dim_ordering('th')
+
 from keras.optimizers import Adadelta
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation, Flatten, Input
@@ -10,8 +13,6 @@ def plainAutoencoder(X_train, X_test, learning_rate=1.0):
 	input_img = Input(shape=(16, 16, 16))
 	x = Convolution2D(20, 3, 3, activation='relu', border_mode='same')(input_img)
 	x = MaxPooling2D((2, 2), border_mode='same')(x)
-	print x.get_shape()
-	exit()
 	x = Convolution2D(10, 3, 3, activation='relu', border_mode='same')(x)
 	x = MaxPooling2D((2, 2), border_mode='same')(x)
 	x = Convolution2D(5, 3, 3, activation='relu', border_mode='same')(x)
@@ -52,24 +53,12 @@ def plainAutoencoder(X_train, X_test, learning_rate=1.0):
 	return model
 
 
-def volumeAutoencoder(X_train, X_test):
-	model = Sequential()
-	# model.add(Convolutional3D
-	return model
-
-
-def plainCNN():
-	model = Sequential()
-	# model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same', input_shape=(3, 32, 32)))
-	return model
-
-
 def volumeCNN():
 	model = Sequential()
-	model.add(Convolution2D(16, 2, 2, activation='relu', input_shape=(13, 13, 13)))
-	model.add(Convolution2D(32, 3, 3, activation='relu'))
-	model.add(MaxPooling2D((2, 2)))
-	model.add(Convolution2D(64, 3, 3, activation='relu'))
+	model.add(Convolution3D(16, 3, 3, 3, activation='relu', input_shape=(1, 16, 16, 16)))
+	model.add(Convolution3D(32, 3, 3, 3, activation='relu'))
+	model.add(MaxPooling3D((2, 2, 2)))
+	model.add(Convolution3D(64, 3, 3, 3, activation='relu'))
 	model.add(Flatten())
 	model.add(Dropout(0.25))
 	model.add(Dense(256))
