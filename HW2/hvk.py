@@ -6,6 +6,7 @@ from keras.layers import Dense, Flatten, Input, Dropout, Activation
 from keras.models import Sequential
 from keras.optimizers import Adadelta
 
+
 def addConv_BatchNorm(size, x, y, model, addInput = False):
 	if (addInput):
 		model.add(Convolution2D(size, x, y, border_mode = 'same', input_shape = (1, size, size)))
@@ -14,10 +15,12 @@ def addConv_BatchNorm(size, x, y, model, addInput = False):
 	model.add(BatchNormalization())
 	model.add(Activation('relu'))
 
+
 def addDeconv_BatchNorm(size, x, y, model):
 	model.add(Deconvolution2D(size, x, y, input_shape = model.layers[-1].output_shape, border_mode = 'same', output_shape = model.layers[-1].output_shape))
 	model.add(BatchNormalization())
 	model.add(Activation('relu'))
+
 
 def segnet2D_noob():
 	padding = {'top_pad' : 2, 'bottom_pad' : 1, 'left_pad' : 2, 'right_pad' : 1}
@@ -71,4 +74,8 @@ def segnet2D_noob():
 
 if __name__ == '__main__':
 	model = segnet2D_noob()
+
+
+
+
 

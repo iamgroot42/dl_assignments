@@ -1,1 +1,5 @@
 Data/*
+*.hdf5
+*.deb
+*.tgz
+newData/*

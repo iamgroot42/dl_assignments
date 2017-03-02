@@ -10,7 +10,7 @@ from keras.layers import Dense, Dropout, Activation, Flatten, Input
 from keras.layers import Convolution2D, Convolution3D, MaxPooling2D, MaxPooling3D, AveragePooling3D, UpSampling2D, UpSampling3D, ZeroPadding2D
 
 
-def volumeCNN(learning_rate):
+def volumeCNN(learning_rate = 0.01):
 	model = Sequential()
 	model.add(Convolution3D(16, 3, 3, 3, activation='relu', input_shape=(1, 13, 13, 13)))
 	model.add(AveragePooling3D((2, 2, 2)))	
@@ -33,7 +33,7 @@ def volumeCNN(learning_rate):
 	return model
 
 
-def paperCNN(learning_rate):
+def paperCNN(learning_rate=1):
 	model = Sequential()
 	model.add(Convolution3D(64, 5, 5, 5, activation='relu', input_shape=(1, 13, 13, 13)))
 	model.add(Convolution3D(256, 5, 5, 5, activation='relu'))
@@ -42,7 +42,7 @@ def paperCNN(learning_rate):
 	model.add(BatchNormalization())
 	model.add(Dense(3))
 	model.add(Activation('softmax'))
-	model.add(Dropout(0.5))
+	#model.add(Dropout(0.5))
 	model.compile(loss='categorical_crossentropy',
 		optimizer=keras.optimizers.Adadelta(lr=learning_rate, rho=0.95, epsilon=1e-08, decay=0.0),
 		metrics=['accuracy'])
