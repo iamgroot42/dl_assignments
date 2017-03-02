@@ -21,6 +21,10 @@ def get_data(base_dir='Data/', splice=False):
 
 def split_data(X, y, split=0.8):
 	train_examples = int(X.shape[0] * split)
+	#Shuffle data
+	#p = np.random.permutation(len(y))
+	#X = X[p]
+	#y = y[p]
 	if len(X.shape) == 3:
 		X_train = X[:train_examples,:]
 		X_test = X[train_examples:,:]

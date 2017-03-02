@@ -7,12 +7,11 @@ from keras.callbacks import ModelCheckpoint
 
 import cnn
 import read_data
-import hvk
 import hvk_cnn
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer('nb_epochs', 50, 'Number of epochs to train model')
+flags.DEFINE_integer('nb_epochs', 10, 'Number of epochs to train model')
 flags.DEFINE_integer('batch_size', 128, 'Batch size')
 flags.DEFINE_float('learning_rate', 0.1, 'Learning rate for training')
 
@@ -24,8 +23,8 @@ if __name__ == "__main__":
 	# m = hvk_cnn.volumeCNN()
 	#m = cnn.volumeCNN(FLAGS.learning_rate)
 	#m = cnn.paperCNN(FLAGS.learning_rate)
-	m = hvk_cnn.paperCNN()
-	# m = hvk.segnet2D_noob()
+	#m = hvk_cnn.paperCNN()
+	m = hvk.segnet2D_noob()
 	# x = Image.fromarray(xtr[0])
 	# x.saveImage("Original_image.png")
 	m.fit(xtr, ytr,

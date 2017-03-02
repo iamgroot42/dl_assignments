@@ -2,4 +2,5 @@ Data/*
 *.hdf5
 *.deb
 *.tgz
-newData/*
+*.nii
+IBSR_nifti_stripped/*

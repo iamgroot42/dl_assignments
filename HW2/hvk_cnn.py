@@ -40,6 +40,7 @@ def paperCNN(learning_rate=1):
 	model.add(Convolution3D(768, 5, 5, 5, activation='relu'))
 	model.add(Flatten())
 	model.add(BatchNormalization())
+	model.add(Dropout(0.5))
 	model.add(Dense(3))
 	model.add(Activation('softmax'))
 	#model.add(Dropout(0.5))
