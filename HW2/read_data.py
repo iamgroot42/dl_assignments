@@ -55,6 +55,8 @@ def classfication_data(base_dir='Data/', split=0.8, splice=True):
 	y = get_labels(splice=splice)
 	return split_data(X, y, split)
 
+def process_labeldata():
+
 
 def segmentation_data(base_dir='IBSR_nifti_stripped/', splice=True):
 	if splice:
@@ -69,3 +71,7 @@ def segmentation_data(base_dir='IBSR_nifti_stripped/', splice=True):
 		yte = np.load(base_dir + "y_test_splice.npy")
 	print ytr.shape
 	return xtr, ytr, xte, yte
+
+
+# (8, 1, 256, 256, 128)
+# (1024, 1, 256, 256)
