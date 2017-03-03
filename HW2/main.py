@@ -26,9 +26,9 @@ def load_data(ttype, dimension):
 			xtr, ytr, xte, yte, weights = read_data.classfication_data(splice=False)
 	else:
 		if dimension is 2:
-			xtr, ytr, xte, yte, weights = read_data.segmentation_data(splice=True)
+			xtr, ytr, xte, yte, weights = read_data.segmentation_data(splice=True, type=3)
 		else:
-			xtr, ytr, xte, yte, weights = read_data.segmentation_data(splice=False)
+			xtr, ytr, xte, yte, weights = read_data.segmentation_data(splice=False, type=3)
 	return xtr, ytr, xte, yte, weights
 
 
@@ -36,15 +36,15 @@ def get_model(ttype, dimension):
 	if ttype is 'classify':
 		# Ideal learning rate: 1
 		if dimension is 2:
-			model = classify_cnn.CNN2D(FLAGS.learning_rate)
+			model = classify_cnn.CNN2D(learning_rate=FLAGS.learning_rate)
 		else:
-			model = classify_cnn.CNN3D(FLAGS.learning_rate)
+			model = classify_cnn.CNN3D(learning_rate=FLAGS.learning_rate)
 	else:
 		# Ideal learning rate: 0.01
 		if dimension is 2:
-			model = segment_cnn.CNN2D(FLAGS.learning_rate)
+			model = segment_cnn.CNN2D(learning_rate=FLAGS.learning_rate)
 		else:
-			model = segment_cnn.CNN3D(FLAGS.learning_rate)
+			model = segment_cnn.CNN3D(learning_rate=FLAGS.learning_rate)
 	return model
 
 
