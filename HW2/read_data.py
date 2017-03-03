@@ -58,14 +58,14 @@ def classfication_data(base_dir='Data/', split=0.8, splice=True):
 
 def segmentation_data(base_dir='IBSR_nifti_stripped/', splice=True):
 	if splice:
-		xtr = np.load("X_train.npy")
-		xte = np.load("X_test.npy")
-		ytr = np.load("y_train.npy")
-		yte = np.load("y_test.npy")
+		xtr = np.load(base_dir + "X_train.npy")
+		xte = np.load(base_dir + "X_test.npy")
+		ytr = np.load(base_dir + "y_train.npy")
+		yte = np.load(base_dir + "y_test.npy")
 	else:
-		xtr = np.load("X_train_splice.npy")
-		xte = np.load("X_test_splice.npy")
-		ytr = np.load("y_train_splice.npy")
-		yte = np.load("y_test_splice.npy")
+		xtr = np.load(base_dir + "X_train_splice.npy")
+		xte = np.load(base_dir + "X_test_splice.npy")
+		ytr = np.load(base_dir + "y_train_splice.npy")
+		yte = np.load(base_dir + "y_test_splice.npy")
 	print ytr.shape
 	return xtr, ytr, xte, yte

@@ -22,7 +22,7 @@ def CNN3D(learning_rate=1):
 	model.add(Activation('softmax'))
 	model.compile(loss='categorical_crossentropy',
 		optimizer=keras.optimizers.Adadelta(lr=learning_rate, rho=0.95, epsilon=1e-08, decay=0.0),
-		metrics=['accuracy'])
+		metrics=['accuracy','fmeasure'])
 	return model
 
 
@@ -38,5 +38,5 @@ def CNN2D(learning_rate=1):
 	model.add(Activation('softmax'))
 	model.compile(loss='categorical_crossentropy',
 		optimizer=keras.optimizers.Adadelta(lr=learning_rate, rho=0.95, epsilon=1e-08, decay=0.0),
-		metrics=['accuracy'])
+		metrics=['accuracy','fmeasure'])
 	return model

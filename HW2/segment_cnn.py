@@ -26,7 +26,7 @@ def addConv_BatchNorm3d(size, x, y, z, model, addInput = False):
 	model.add(Activation('relu'))
 
 
-def CNN2D(n_labels=4):
+def CNN2D(n_labels=4, learning_rate=0.01):
 	model = Sequential()
 	
 	addConv_BatchNorm2d(64, 3, 3, model, addInput = True)
@@ -67,17 +67,17 @@ def CNN2D(n_labels=4):
 	model.add(UpSampling2D())
 	addConv_BatchNorm2d(64, 3, 3, model)
 	model.add(Convolution2D(n_labels, 1, 1, border_mode='valid'))
-	model.add(BatchNormalization())
+	# model.add(BatchNormalization())
 	
 	model.add(Reshape((n_labels, 256 * 256)))
 	model.add(Permute((2, 1)))
 	model.add(Activation('softmax'))
 
-	model.compile(loss = 'categorical_crossentropy', optimizer = Adadelta(lr = 0.01), metrics = ['accuracy','fmeasure'])
+	model.compile(loss = 'categorical_crossentropy', optimizer = Adadelta(lr = learning_rate), metrics = ['accuracy','fmeasure'])
 	return model
 
 
-def CNN3D(n_labels=4):
+def CNN3D(n_labels=4, learning_rate=0.01):
 	model = Sequential()
 
 	addConv_BatchNorm3d(64, 3, 3, 3, model, addInput = True)
@@ -126,5 +126,5 @@ def CNN3D(n_labels=4):
 	model.add(Permute((2, 1)))
 	model.add(Activation('softmax'))
 
-	model.compile(loss = 'categorical_crossentropy', optimizer = Adadelta(lr = 0.01), metrics = ['accuracy','fmeasure'])
+	model.compile(loss = 'categorical_crossentropy', optimizer = Adadelta(lr = learning_rate), metrics = ['accuracy','fmeasure'])
 	return model
