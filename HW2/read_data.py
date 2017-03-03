@@ -21,10 +21,6 @@ def get_data(base_dir='Data/', splice=False):
 
 def split_data(X, y, split=0.8):
 	train_examples = int(X.shape[0] * split)
-	#Shuffle data
-	#p = np.random.permutation(len(y))
-	#X = X[p]
-	#y = y[p]
 	if len(X.shape) == 3:
 		X_train = X[:train_examples,:]
 		X_test = X[train_examples:,:]
@@ -54,15 +50,22 @@ def get_labels(base_dir='Data/', splice=False):
 	return one_hot
 
 
-def load_data(base_dir='Data/', split=0.8):
-	X = get_data(splice=True)
-	y = get_labels(splice=True)
+def classfication_data(base_dir='Data/', split=0.8, splice=True):
+	X = get_data(splice=splice)
+	y = get_labels(splice=splice)
 	return split_data(X, y, split)
 
 
-if __name__ == "__main__":
-	X = get_data(splice=True)
-	y = get_labels(splice=True)
-	np.save("Data/X_splice.npy",X)
-	np.save("Data/y_splice.npy",y)
-
+def segmentation_data(base_dir='IBSR_nifti_stripped/', splice=True):
+	if splice:
+		xtr = np.load("X_train.npy")
+		xte = np.load("X_test.npy")
+		ytr = np.load("y_train.npy")
+		yte = np.load("y_test.npy")
+	else:
+		xtr = np.load("X_train_splice.npy")
+		xte = np.load("X_test_splice.npy")
+		ytr = np.load("y_train_splice.npy")
+		yte = np.load("y_test_splice.npy")
+	print ytr.shape
+	return xtr, ytr, xte, yte
