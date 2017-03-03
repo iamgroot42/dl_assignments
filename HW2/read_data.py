@@ -64,14 +64,14 @@ def process_labels(y, n_classes=4):
 	for x in z:
 		zee.append(to_categorical(x, n_classes))
 	zee = np.array(zee)
-	zee = np.transpose(zee,(0,2,1))
 	return zee
 
 
-def get_weights(y):
+def get_weights(y, along_this=1):
 	wd = {}
+	y = np.argmax(y,axis=along_this)
 	labels = np.unique(y)
-	weights = np.bincount(b.flatten().astype('int32')).astype('float64')
+	weights = np.bincount(y.flatten().astype('int32')).astype('float64')
 	weights = weights/weights.sum()
 	weights = 1/weights
 	weights = weights/weights.sum()
@@ -81,21 +81,22 @@ def get_weights(y):
 
 
 def segmentation_data(splice, base_dir='IBSR_nifti_stripped/', type=1):
-		weights = {}
-        if type == 1:
-                base_dir = base_dir + '/122/'
-        elif type == 2:
-                base_dir = base_dir + '/212/'
-        else:
-                base_dir = base_dir + '/221/'
-        if not splice:
-                xtr = np.load(base_dir + "X_train.npy")
-                xte = np.load(base_dir + "X_test.npy")
-                ytr = process_labels(np.load(base_dir + "y_train.npy"))
-                yte = process_labels(np.load(base_dir + "y_test.npy"))
-        else:
-                xtr = np.load(base_dir + "X_train_splice.npy")
-                xte = np.load(base_dir + "X_test_splice.npy")
-                ytr = process_labels(np.load(base_dir + "y_train_splice.npy"))
-                yte = process_labels(np.load(base_dir + "y_test_splice.npy"))
-        return xtr, ytr, xte, yte, get_weights(ytr)
+	weights = {}
+	if type == 1:
+		base_dir = base_dir + '/122/'
+	elif type == 2:
+		base_dir = base_dir + '/212/'
+	else:
+		base_dir = base_dir + '/221/'
+	if not splice:
+		xtr = np.load(base_dir + "X_train.npy")
+		xte = np.load(base_dir + "X_test.npy")
+		ytr = process_labels(np.load(base_dir + "y_train.npy"))
+		yte = process_labels(np.load(base_dir + "y_test.npy"))
+	else:
+		xtr = np.load(base_dir + "X_train_splice.npy")
+		xte = np.load(base_dir + "X_test_splice.npy")
+		ytr = process_labels(np.load(base_dir + "y_train_splice.npy"))
+		yte = process_labels(np.load(base_dir + "y_test_splice.npy"))
+	return xtr, ytr, xte, yte, get_weights(ytr, 2)
+

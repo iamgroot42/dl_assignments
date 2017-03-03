@@ -19,7 +19,7 @@ flags.DEFINE_integer('dimension', 2, '2D or 3D')
 
 
 def load_data(ttype, dimension):
-	if ttype is 'classify':
+	if ttype == "classify":
 		if dimension is 2:
 			xtr, ytr, xte, yte, weights = read_data.classfication_data(splice=True)
 		else:
@@ -33,7 +33,7 @@ def load_data(ttype, dimension):
 
 
 def get_model(ttype, dimension):
-	if ttype is 'classify':
+	if ttype == "classify":
 		# Ideal learning rate: 1
 		if dimension is 2:
 			model = classify_cnn.CNN2D(learning_rate=FLAGS.learning_rate)
@@ -51,12 +51,18 @@ def get_model(ttype, dimension):
 if __name__ == "__main__":
 	xtr, ytr, xte, yte, weights = load_data(FLAGS.type, FLAGS.dimension)
 	model = get_model(FLAGS.type, FLAGS.dimension)
-	exit()
-	model.fit(xtr, ytr,
+	if FLAGS.type == "classify":
+		model.fit(xtr, ytr,
+			nb_epoch=FLAGS.nb_epochs,
+			batch_size=FLAGS.batch_size,
+			validation_split=0.2,
+			class_weight=weights,
+			callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")])
+	else:
+		model.fit(xtr, ytr,
 		nb_epoch=FLAGS.nb_epochs,
 		batch_size=FLAGS.batch_size,
 		validation_split=0.2,
-		class_weight=weights,
 		callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")])
 	accuracy, f_score = model.evaluate(xte, yte)
 	print "\nTesting accuracy:",accuracy*100,"%"
