@@ -8,6 +8,7 @@ from keras.callbacks import ModelCheckpoint
 import cnn
 import read_data
 import hvk_cnn
+import hvk_segnetnoob
 
 FLAGS = flags.FLAGS
 
@@ -18,13 +19,15 @@ flags.DEFINE_float('learning_rate', 0.1, 'Learning rate for training')
 
 if __name__ == "__main__":
 	print "Loading data"
-	xtr, ytr, xte, yte = read_data.load_data()
+	# xtr, ytr, xte, yte = read_data.load_data()
 	print "Data loaded"
 	# m = hvk_cnn.volumeCNN()
 	#m = cnn.volumeCNN(FLAGS.learning_rate)
 	#m = cnn.paperCNN(FLAGS.learning_rate)
 	#m = hvk_cnn.paperCNN()
-	m = hvk.segnet2D_noob()
+	# m = hvk.segnet2D_noob()
+	m = hvk_segnetnoob.segnet3D_noob()
+	exit()
 	# x = Image.fromarray(xtr[0])
 	# x.saveImage("Original_image.png")
 	m.fit(xtr, ytr,

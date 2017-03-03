@@ -55,12 +55,14 @@ def get_labels(base_dir='Data/', splice=False):
 
 
 def load_data(base_dir='Data/', split=0.8):
-	X = get_data()
-	y = get_labels()
+	X = get_data(splice=True)
+	y = get_labels(splice=True)
 	return split_data(X, y, split)
 
 
 if __name__ == "__main__":
-	X = get_data(splice=False)
-	y = get_labels(splice=False)
+	X = get_data(splice=True)
+	y = get_labels(splice=True)
+	np.save("Data/X_splice.npy",X)
+	np.save("Data/y_splice.npy",y)
 
