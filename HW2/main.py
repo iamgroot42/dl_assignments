@@ -21,15 +21,15 @@ flags.DEFINE_integer('dimension', 2, '2D or 3D')
 def load_data(ttype, dimension):
 	if ttype is 'classify':
 		if dimension is 2:
-			xtr, ytr, xte, yte = read_data.classfication_data(splice=True)
+			xtr, ytr, xte, yte, weights = read_data.classfication_data(splice=True)
 		else:
-			xtr, ytr, xte, yte = read_data.classfication_data(splice=False)
+			xtr, ytr, xte, yte, weights = read_data.classfication_data(splice=False)
 	else:
 		if dimension is 2:
-			xtr, ytr, xte, yte = read_data.segmentation_data(splice=True)
+			xtr, ytr, xte, yte, weights = read_data.segmentation_data(splice=True)
 		else:
-			xtr, ytr, xte, yte = read_data.segmentation_data(splice=False)
-	return xtr, ytr, xte, yte
+			xtr, ytr, xte, yte, weights = read_data.segmentation_data(splice=False)
+	return xtr, ytr, xte, yte, weights
 
 
 def get_model(ttype, dimension):
@@ -49,15 +49,14 @@ def get_model(ttype, dimension):
 
 
 if __name__ == "__main__":
-	xtr, ytr, xte, yte = load_data(FLAGS.type, FLAGS.dimension)
-	print ytr.shape
+	xtr, ytr, xte, yte, weights = load_data(FLAGS.type, FLAGS.dimension)
 	model = get_model(FLAGS.type, FLAGS.dimension)
-	print model.output
 	exit()
 	model.fit(xtr, ytr,
 		nb_epoch=FLAGS.nb_epochs,
 		batch_size=FLAGS.batch_size,
 		validation_split=0.2,
+		class_weight=weights,
 		callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")])
 	accuracy, f_score = model.evaluate(xte, yte)
 	print "\nTesting accuracy:",accuracy*100,"%"
