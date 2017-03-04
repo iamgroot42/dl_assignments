@@ -78,52 +78,46 @@ def CNN2D(n_labels=4, learning_rate=0.01, pad=1):
 def CNN3D(n_labels=4, learning_rate=0.01, pad=1):
 	model = Sequential()
 
-	model.add(ZeroPadding3D(padding=(pad,pad,pad), input_shape=(1,256,256,128)))
-	addConv_BatchNorm3d(16, 3, 3, 3, model)
-	addConv_BatchNorm3d(16, 3, 3, 3, model)
+	addConv_BatchNorm3d(16, 5, 5, 5, model, addInput=True)
+	print model.layers[-1].output_shape
 	model.add(MaxPooling3D())
+	print model.layers[-1].output_shape
 	
-	model.add(ZeroPadding3D(padding=(pad,pad,pad)))
-	addConv_BatchNorm3d(32, 3, 3, 3, model)
-	addConv_BatchNorm3d(32, 3, 3, 3, model)
+	addConv_BatchNorm3d(32, 5, 5, 5, model)
+	print model.layers[-1].output_shape
 	model.add(MaxPooling3D())
+	print model.layers[-1].output_shape
 	
-	model.add(ZeroPadding3D(padding=(pad,pad,pad)))
-	addConv_BatchNorm3d(64, 3, 3, 3, model)
-	addConv_BatchNorm3d(64, 3, 3, 3, model)
-	
-	# Encoding done 
+	addConv_BatchNorm3d(64, 4, 4, 4, model)
+	print model.layers[-1].output_shape
+	model.add(MaxPooling3D())
+	print model.layers[-1].output_shape
+
 	encoder = model
 
-	model.add(ZeroPadding3D(padding=(pad,pad,pad)))
-	model.add(Convolution3D(64, 3, 3, 3, border_mode='valid'))
-	model.add(BatchNormalization())
-
-	model.add(ZeroPadding3D(padding=(pad,pad,pad)))
-	model.add(Convolution3D(64, 3, 3, 3, border_mode='valid'))
-	model.add(BatchNormalization())
-
+	model.add(ZeroPadding3D(padding=(1,1,1)))
 	model.add(UpSampling3D())
-	model.add(ZeroPadding3D(padding=(pad,pad,pad)))
-	model.add(Convolution3D(32, 3, 3, 3, border_mode='valid'))
+	print model.layers[-1].output_shape
+
+	model.add(Convolution3D(32, 2, 2, 2, border_mode='valid'))
 	model.add(BatchNormalization())
-	
+	print model.layers[-1].output_shape
+
+	model.add(ZeroPadding3D(padding=(2,2,2)))	
 	model.add(UpSampling3D())
-	model.add(ZeroPadding3D(padding=(pad,pad,pad)))
-	model.add(Convolution3D(32, 3, 3, 3, border_mode='valid'))
+	model.add(Convolution3D(16, 5, 5, 5, border_mode='valid'))
 	model.add(BatchNormalization())
+	print model.layers[-1].output_shape
 
 	model.add(UpSampling3D())
-	model.add(ZeroPadding3D(padding=(pad,pad,pad)))
-	model.add(Convolution3D(16, 3, 3, 3,border_mode='valid'))
-	model.add(BatchNormalization())
-
+	model.add(ZeroPadding3D(padding=(2,2,2)))
 	model.add(UpSampling3D())
-	model.add(ZeroPadding3D(padding=(pad,pad,pad)))
-	model.add(Convolution3D(16, 3, 3, 3, border_mode='valid'))
+	model.add(Convolution3D(16, 5, 5, 5, border_mode='valid'))
 	model.add(BatchNormalization())
+	print model.layers[-1].output_shape
 	
 	model.add(Convolution3D(n_labels, 1, 1, 1,border_mode='valid'))
+	print model.layers[-1].output_shape
 	model.add(Reshape((n_labels, 256 * 256 * 128)))
 	model.add(Permute((2, 1)))
 	model.add(Activation('softmax'))

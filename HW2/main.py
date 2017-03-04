@@ -5,6 +5,8 @@ tf.python.control_flow_ops = tf
 from tensorflow.python.platform import flags
 from keras.callbacks import ModelCheckpoint
 from keras.models import load_model
+import numpy as np
+from sklearn.metrics import accuracy_score
 
 import read_data
 import classify_cnn
@@ -45,9 +47,9 @@ def get_model(ttype, dimension):
 	else:
 		# Ideal learning rate: 0.01
 		if dimension is 2:
-			model = segmentweak_cnn.CNN2D(learning_rate=FLAGS.learning_rate)
+			model = segmentweak_cnn.CNN2D(learning_rate = FLAGS.learning_rate)
 		else:
-			model = segmentweak_cnn.CNN3D(learning_rate=FLAGS.learning_rate)
+			model = segmentweak_cnn.CNN3D(learning_rate = FLAGS.learning_rate)
 	return model
 
 
@@ -55,6 +57,20 @@ def test_model(model, X, y):
 	accuracy, f_score = model.evaluate(X,y)[1:]
 	print "\nTesting accuracy:",accuracy*100,"%"
 	print "F-Score accuracy:",f_score	
+
+
+def classwise_scores(model, X, y):
+	y_ =  model.predict(X, batch_size = FLAGS.batch_size)
+	acc = {}
+	if FLAGS.type == "classify":
+		for i in range(y.shape[1]):
+			acc[i] = (1 * (y[:,i] == (1 * (y_[:,i] == np.amax(y_,1))))).sum()
+			acc[i] /= float(np.prod(y.shape)/y.shape[1])
+	else:	
+		for i in range(y.shape[2]):
+			acc[i] = (1 * (y[:,:,i].flatten() == (1*(y_[:,:,i] == np.amax(y_,2))).flatten())).sum()
+			acc[i] /= float(np.prod(y.shape)/y.shape[2])
+	return acc
 
 
 if __name__ == "__main__":
@@ -77,4 +93,6 @@ if __name__ == "__main__":
 	else:
 		model = load_model(FLAGS.model_path)
 	test_model(model, xte, yte)
-
+	acc = classwise_scores(model, xte, yte)
+	print "Classwise accuracies:"
+	print acc
