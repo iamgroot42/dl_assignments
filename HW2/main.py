@@ -15,18 +15,38 @@ import segmentweak_cnn
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer('nb_epochs', 10, 'Number of epochs to train model')
+flags.DEFINE_integer('nb_epochs', 20, 'Number of epochs to train model')
 flags.DEFINE_integer('batch_size', 128, 'Batch size')
 flags.DEFINE_float('learning_rate', 0.1, 'Learning rate for training')
 flags.DEFINE_string('type', 'segment', 'Classification or segmentation')
 flags.DEFINE_integer('dimension', 2, '2D or 3D')
 flags.DEFINE_string('model_path', "", 'Path to saved model with weights')
 
+bc = None
 
 def load_data(ttype, dimension):
 	if ttype == "classify":
 		if dimension is 2:
-			xtr, ytr, xte, yte, weights = read_data.classfication_data(splice=True)
+			xtr, ytr, xte, yte, weights = read_data.segmentation_data(splice=True)
+			ytr_slice, yte_slice = [], []
+			for i in xrange(ytr.shape[0]):
+				temp = np.sum(ytr[i], axis = 0)
+				ytr_slice.append(temp)
+			for i in xrange(yte.shape[0]):
+				temp = np.sum(yte[i], axis = 0)
+				yte_slice.append(temp)
+			ytr, yte = np.array(ytr_slice), np.array(yte_slice)
+			ytr /= ytr.sum()
+			yte /= yte.sum() 
+			ytr = np.multiply(ytr, weights.values())
+			yte = np.multiply(yte, weights.values())
+			for i in xrange(ytr.shape[0]):
+				pos = np.argmax(ytr[i])
+				ytr[i] = [0 if (pos != j) else 1 for j in xrange(len(ytr[i]))]
+			for i in xrange(yte.shape[0]):
+				pos = np.argmax(yte[i])
+				yte[i] = [0 if (pos != j) else 1 for j in xrange(len(yte[i]))]
+			print ytr
 		else:
 			xtr, ytr, xte, yte, weights = read_data.classfication_data(splice=False)
 	else:
@@ -56,7 +76,7 @@ def get_model(ttype, dimension):
 def test_model(model, X, y):
 	accuracy, f_score = model.evaluate(X,y)[1:]
 	print "\nTesting accuracy:",accuracy*100,"%"
-	print "F-Score accuracy:",f_score	
+	print "F-Score accuracy:",f_score
 
 
 def classwise_scores(model, X, y):
@@ -81,15 +101,18 @@ if __name__ == "__main__":
 			model.fit(xtr, ytr,
 				nb_epoch=FLAGS.nb_epochs,
 				batch_size=FLAGS.batch_size,
-				validation_split=0.2,
-				class_weight=weights,
-				callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")])
+				validation_split=0.2
+				#,class_weight=weights
+				#,callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")]
+				)
 		else:
 			model.fit(xtr, ytr,
 				nb_epoch=FLAGS.nb_epochs,
 				batch_size=FLAGS.batch_size,
-				validation_split=0.2,
-				callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")])
+				validation_split=0.2
+				#,class_weight=weights
+				#,callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")]
+				)
 	else:
 		model = load_model(FLAGS.model_path)
 	test_model(model, xte, yte)

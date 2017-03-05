@@ -28,13 +28,14 @@ def CNN3D(learning_rate=1):
 
 def CNN2D(learning_rate=1):
 	model = Sequential()
-	model.add(Convolution2D(64, 5, 5, activation='relu', input_shape=(1, 13, 13)))
-	model.add(Convolution2D(256, 5, 5, activation='relu'))
-	model.add(Convolution2D(768, 5, 5, activation='relu'))
+	model.add(Convolution2D(32, 3, 3, activation='relu', input_shape=(1, 256, 256)))
+	model.add(MaxPooling2D())
+	model.add(Convolution2D(64, 3, 3, activation='relu'))
+	model.add(MaxPooling2D())
 	model.add(Flatten())
 	model.add(BatchNormalization())
 	model.add(Dropout(0.5))
-	model.add(Dense(3))
+	model.add(Dense(4))
 	model.add(Activation('softmax'))
 	model.compile(loss='categorical_crossentropy',
 		optimizer=keras.optimizers.Adadelta(lr=learning_rate, rho=0.95, epsilon=1e-08, decay=0.0),

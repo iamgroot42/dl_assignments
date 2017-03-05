@@ -1,3 +1,6 @@
+import tensorflow as tf
+tf.python.control_flow_ops = tf
+
 import numpy as np
 
 from keras.layers import BatchNormalization
@@ -78,46 +81,50 @@ def CNN2D(n_labels=4, learning_rate=0.01, pad=1):
 def CNN3D(n_labels=4, learning_rate=0.01, pad=1):
 	model = Sequential()
 
-	addConv_BatchNorm3d(16, 5, 5, 5, model, addInput=True)
-	print model.layers[-1].output_shape
-	model.add(MaxPooling3D())
-	print model.layers[-1].output_shape
-	
-	addConv_BatchNorm3d(32, 5, 5, 5, model)
-	print model.layers[-1].output_shape
-	model.add(MaxPooling3D())
-	print model.layers[-1].output_shape
-	
-	addConv_BatchNorm3d(64, 4, 4, 4, model)
-	print model.layers[-1].output_shape
-	model.add(MaxPooling3D())
-	print model.layers[-1].output_shape
+	# Downsample volume to make it (1,64,64,64)
+	model.add(MaxPooling3D((4,4,2), input_shape=(1, 256, 256, 128)))
 
+	model.add(ZeroPadding3D(padding=(1,1,1)))
+	addConv_BatchNorm3d(32, 3, 3, 3, model)
+	model.add(MaxPooling3D())
+	
+	model.add(ZeroPadding3D(padding=(1,1,1)))
+	addConv_BatchNorm3d(64, 3, 3, 3, model)
+	model.add(MaxPooling3D())
+	
+	model.add(ZeroPadding3D(padding=(1,1,1)))
+	addConv_BatchNorm3d(128, 3, 3, 3, model)
+	model.add(MaxPooling3D())
+
+	model.add(ZeroPadding3D(padding=(1,1,1)))
+	addConv_BatchNorm3d(256, 3, 3, 3, model)
+	
+	# Encoding done 
 	encoder = model
 
 	model.add(ZeroPadding3D(padding=(1,1,1)))
-	model.add(UpSampling3D())
-	print model.layers[-1].output_shape
-
-	model.add(Convolution3D(32, 2, 2, 2, border_mode='valid'))
+	model.add(Convolution3D(256, 3, 3, 3, border_mode='valid'))
 	model.add(BatchNormalization())
-	print model.layers[-1].output_shape
-
-	model.add(ZeroPadding3D(padding=(2,2,2)))	
-	model.add(UpSampling3D())
-	model.add(Convolution3D(16, 5, 5, 5, border_mode='valid'))
-	model.add(BatchNormalization())
-	print model.layers[-1].output_shape
 
 	model.add(UpSampling3D())
-	model.add(ZeroPadding3D(padding=(2,2,2)))
-	model.add(UpSampling3D())
-	model.add(Convolution3D(16, 5, 5, 5, border_mode='valid'))
+	model.add(ZeroPadding3D(padding=(1,1,1)))
+	model.add(Convolution3D(128, 3, 3, 3, border_mode='valid'))
 	model.add(BatchNormalization())
-	print model.layers[-1].output_shape
-	
-	model.add(Convolution3D(n_labels, 1, 1, 1,border_mode='valid'))
-	print model.layers[-1].output_shape
+
+	model.add(UpSampling3D())
+	model.add(ZeroPadding3D(padding=(1,1,1)))
+	model.add(Convolution3D(64, 3, 3, 3, border_mode='valid'))
+	model.add(BatchNormalization())
+
+	model.add(UpSampling3D())
+	model.add(ZeroPadding3D(padding=(1,1,1)))
+	model.add(Convolution3D(32, 3, 3, 3, border_mode='valid'))
+	model.add(BatchNormalization())
+
+	model.add(UpSampling3D((4,4,2)))
+
+	model.add(Convolution3D(n_labels, 1, 1, 1, border_mode='valid'))
+
 	model.add(Reshape((n_labels, 256 * 256 * 128)))
 	model.add(Permute((2, 1)))
 	model.add(Activation('softmax'))
@@ -125,3 +132,6 @@ def CNN3D(n_labels=4, learning_rate=0.01, pad=1):
 	model.compile(loss = 'categorical_crossentropy', optimizer = Adadelta(lr = learning_rate), metrics = ['accuracy','fmeasure'])
 	return model
 
+
+if __name__ == "__main__":
+	m = CNN3D()
