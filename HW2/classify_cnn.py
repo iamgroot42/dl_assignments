@@ -32,6 +32,8 @@ def CNN2D(learning_rate=1):
 	model.add(MaxPooling2D())
 	model.add(Convolution2D(64, 3, 3, activation='relu'))
 	model.add(MaxPooling2D())
+	model.add(Convolution2D(128, 3, 3, activation='relu'))
+	model.add(MaxPooling2D())
 	model.add(Flatten())
 	model.add(BatchNormalization())
 	model.add(Dropout(0.5))

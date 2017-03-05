@@ -15,14 +15,12 @@ import segmentweak_cnn
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer('nb_epochs', 20, 'Number of epochs to train model')
+flags.DEFINE_integer('nb_epochs', 10, 'Number of epochs to train model')
 flags.DEFINE_integer('batch_size', 128, 'Batch size')
 flags.DEFINE_float('learning_rate', 0.1, 'Learning rate for training')
 flags.DEFINE_string('type', 'segment', 'Classification or segmentation')
 flags.DEFINE_integer('dimension', 2, '2D or 3D')
 flags.DEFINE_string('model_path', "", 'Path to saved model with weights')
-
-bc = None
 
 def load_data(ttype, dimension):
 	if ttype == "classify":
@@ -46,7 +44,6 @@ def load_data(ttype, dimension):
 			for i in xrange(yte.shape[0]):
 				pos = np.argmax(yte[i])
 				yte[i] = [0 if (pos != j) else 1 for j in xrange(len(yte[i]))]
-			print ytr
 		else:
 			xtr, ytr, xte, yte, weights = read_data.classfication_data(splice=False)
 	else:
@@ -74,7 +71,7 @@ def get_model(ttype, dimension):
 
 
 def test_model(model, X, y):
-	accuracy, f_score = model.evaluate(X,y)[1:]
+	accuracy, f_score = model.evaluate(X,y,batch_size=FLAGS.batch_size)[1:]
 	print "\nTesting accuracy:",accuracy*100,"%"
 	print "F-Score accuracy:",f_score
 
@@ -101,9 +98,9 @@ if __name__ == "__main__":
 			model.fit(xtr, ytr,
 				nb_epoch=FLAGS.nb_epochs,
 				batch_size=FLAGS.batch_size,
-				validation_split=0.2
+				validation_split=0.2,
 				#,class_weight=weights
-				#,callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")]
+				callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")]
 				)
 		else:
 			model.fit(xtr, ytr,
@@ -111,7 +108,7 @@ if __name__ == "__main__":
 				batch_size=FLAGS.batch_size,
 				validation_split=0.2
 				#,class_weight=weights
-				#,callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")]
+				,callbacks=[ModelCheckpoint("Models/" + FLAGS.type + str(FLAGS.dimension) + ".{epoch:02d}-{val_acc:.2f}.hdf5")]
 				)
 	else:
 		model = load_model(FLAGS.model_path)
