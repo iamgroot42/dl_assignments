@@ -27,6 +27,7 @@ from six.moves import urllib
 
 from indicnlp.tokenize import indic_tokenize
 from nltk.tokenize.moses import MosesTokenizer
+from nltk.tokenize import sent_tokenize
 
 from tensorflow.python.platform import gfile
 import tensorflow as tf
@@ -51,14 +52,22 @@ _DIGIT_RE = re.compile(br"\d")
 IITB_TRAIN_DIR = "./data/IITB.en-hi"
 IITB_DEV_DIR = "./data/dev"
 
+# Moses tokenizer
+tknzr = MosesTokenizer()
 
 def tokenize_hindi(sentence):
   return indic_tokenize.trivial_tokenize(sentence.decode('utf-8'))
 
 
 def tokenize_english(sentence):
-  tknzr = MosesTokenizer()
-  return tknzr.tokenize(sentence.decode('utf-8'))
+  try:
+    # print(tknzr.IsAlpha)
+    return sent_tokenize(sentence.decode('utf-8'))
+    return tknzr.tokenize(sentence.decode('utf-8'))
+  except Exception, e:
+    print(e)
+    print(sentence)
+    exit()
 
 
 def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
@@ -223,20 +232,20 @@ def prepare_data(data_dir, from_train_path, to_train_path, from_dev_path, to_dev
   # Create vocabularies of the appropriate sizes.
   to_vocab_path = os.path.join(data_dir, "vocab%d.to" % to_vocabulary_size)
   from_vocab_path = os.path.join(data_dir, "vocab%d.from" % from_vocabulary_size)
-  create_vocabulary(to_vocab_path, to_train_path , to_vocabulary_size, hi_tokenizer)
   create_vocabulary(from_vocab_path, from_train_path , from_vocabulary_size, en_tokenizer)
+  create_vocabulary(to_vocab_path, to_train_path , to_vocabulary_size, hi_tokenizer)
 
   # Create token ids for the training data.
   to_train_ids_path = to_train_path + (".ids%d" % to_vocabulary_size)
   from_train_ids_path = from_train_path + (".ids%d" % from_vocabulary_size)
-  data_to_token_ids(to_train_path, to_train_ids_path, to_vocab_path, hi_tokenizer)
   data_to_token_ids(from_train_path, from_train_ids_path, from_vocab_path, en_tokenizer)
+  data_to_token_ids(to_train_path, to_train_ids_path, to_vocab_path, hi_tokenizer)
 
   # Create token ids for the development data.
   to_dev_ids_path = to_dev_path + (".ids%d" % to_vocabulary_size)
   from_dev_ids_path = from_dev_path + (".ids%d" % from_vocabulary_size)
-  data_to_token_ids(to_dev_path, to_dev_ids_path, to_vocab_path, hi_tokenizer)
   data_to_token_ids(from_dev_path, from_dev_ids_path, from_vocab_path, en_tokenizer)
+  data_to_token_ids(to_dev_path, to_dev_ids_path, to_vocab_path, hi_tokenizer)
 
   return (from_train_ids_path, to_train_ids_path,
           from_dev_ids_path, to_dev_ids_path,
