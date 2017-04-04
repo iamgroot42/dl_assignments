@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Utilities for downloading data from WMT, tokenizing, vocabularies."""
+"""Utilities for  tokenizing, vocabularies."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -24,6 +24,9 @@ import re
 import tarfile
 
 from six.moves import urllib
+
+from indicnlp.tokenize import indic_tokenize
+from nltk.tokenize import MosesTokenizer
 
 from tensorflow.python.platform import gfile
 import tensorflow as tf
@@ -45,74 +48,21 @@ _WORD_SPLIT = re.compile(b"([.,!?\"':;)(])")
 _DIGIT_RE = re.compile(br"\d")
 
 # URLs for WMT data.
-_WMT_ENFR_TRAIN_URL = "http://www.statmt.org/wmt10/training-giga-fren.tar"
-_WMT_ENFR_DEV_URL = "http://www.statmt.org/wmt15/dev-v2.tgz"
+IITB_TRAIN_DIR = "./data/IITB.en-hi"
+IITB_DEV_DIR = "./data/dev"
 
 
-def maybe_download(directory, filename, url):
-  """Download filename from url unless it's already in directory."""
-  if not os.path.exists(directory):
-    print("Creating directory %s" % directory)
-    os.mkdir(directory)
-  filepath = os.path.join(directory, filename)
-  if not os.path.exists(filepath):
-    print("Downloading %s to %s" % (url, filepath))
-    filepath, _ = urllib.request.urlretrieve(url, filepath)
-    statinfo = os.stat(filepath)
-    print("Successfully downloaded", filename, statinfo.st_size, "bytes")
-  return filepath
+def tokenize_hindi(sentence):
+  return indic_tokenize.trivial_tokenize(sentence)
 
 
-def gunzip_file(gz_path, new_path):
-  """Unzips from gz_path into new_path."""
-  print("Unpacking %s to %s" % (gz_path, new_path))
-  with gzip.open(gz_path, "rb") as gz_file:
-    with open(new_path, "wb") as new_file:
-      for line in gz_file:
-        new_file.write(line)
-
-
-def get_wmt_enfr_train_set(directory):
-  """Download the WMT en-fr training corpus to directory unless it's there."""
-  train_path = os.path.join(directory, "giga-fren.release2.fixed")
-  if not (gfile.Exists(train_path +".fr") and gfile.Exists(train_path +".en")):
-    corpus_file = maybe_download(directory, "training-giga-fren.tar",
-                                 _WMT_ENFR_TRAIN_URL)
-    print("Extracting tar file %s" % corpus_file)
-    with tarfile.open(corpus_file, "r") as corpus_tar:
-      corpus_tar.extractall(directory)
-    gunzip_file(train_path + ".fr.gz", train_path + ".fr")
-    gunzip_file(train_path + ".en.gz", train_path + ".en")
-  return train_path
-
-
-def get_wmt_enfr_dev_set(directory):
-  """Download the WMT en-fr training corpus to directory unless it's there."""
-  dev_name = "newstest2013"
-  dev_path = os.path.join(directory, dev_name)
-  if not (gfile.Exists(dev_path + ".fr") and gfile.Exists(dev_path + ".en")):
-    dev_file = maybe_download(directory, "dev-v2.tgz", _WMT_ENFR_DEV_URL)
-    print("Extracting tgz file %s" % dev_file)
-    with tarfile.open(dev_file, "r:gz") as dev_tar:
-      fr_dev_file = dev_tar.getmember("dev/" + dev_name + ".fr")
-      en_dev_file = dev_tar.getmember("dev/" + dev_name + ".en")
-      fr_dev_file.name = dev_name + ".fr"  # Extract without "dev/" prefix.
-      en_dev_file.name = dev_name + ".en"
-      dev_tar.extract(fr_dev_file, directory)
-      dev_tar.extract(en_dev_file, directory)
-  return dev_path
-
-
-def basic_tokenizer(sentence):
-  """Very basic tokenizer: split the sentence into a list of tokens."""
-  words = []
-  for space_separated_fragment in sentence.strip().split():
-    words.extend(_WORD_SPLIT.split(space_separated_fragment))
-  return [w for w in words if w]
+def tokenize_english(sentence):
+  tknzr = MosesTokenizer()
+  return tknzr.tokenize(sentence)
 
 
 def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
-                      tokenizer=None, normalize_digits=True):
+                      tokenizer, normalize_digits=True):
   """Create vocabulary file (if it does not exist yet) from data file.
 
   Data file is assumed to contain one sentence per line. Each sentence is
@@ -139,7 +89,7 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
         if counter % 100000 == 0:
           print("  processing line %d" % counter)
         line = tf.compat.as_bytes(line)
-        tokens = tokenizer(line) if tokenizer else basic_tokenizer(line)
+        tokens = tokenizer(line)
         for w in tokens:
           word = _DIGIT_RE.sub(b"0", w) if normalize_digits else w
           if word in vocab:
@@ -185,12 +135,8 @@ def initialize_vocabulary(vocabulary_path):
 
 
 def sentence_to_token_ids(sentence, vocabulary,
-                          tokenizer=None, normalize_digits=True):
+                          tokenizer, normalize_digits=True):
   """Convert a string to list of integers representing token-ids.
-
-  For example, a sentence "I have a dog" may become tokenized into
-  ["I", "have", "a", "dog"] and with vocabulary {"I": 1, "have": 2,
-  "a": 4, "dog": 7"} this function will return [1, 2, 4, 7].
 
   Args:
     sentence: the sentence in bytes format to convert to token-ids.
@@ -203,10 +149,7 @@ def sentence_to_token_ids(sentence, vocabulary,
     a list of integers, the token-ids for the sentence.
   """
 
-  if tokenizer:
-    words = tokenizer(sentence)
-  else:
-    words = basic_tokenizer(sentence)
+  words = tokenizer(sentence)
   if not normalize_digits:
     return [vocabulary.get(w, UNK_ID) for w in words]
   # Normalize digits by 0 before looking words up in the vocabulary.
@@ -214,7 +157,7 @@ def sentence_to_token_ids(sentence, vocabulary,
 
 
 def data_to_token_ids(data_path, target_path, vocabulary_path,
-                      tokenizer=None, normalize_digits=True):
+                      tokenizer, normalize_digits=True):
   """Tokenize data file and turn into token-ids using given vocabulary file.
 
   This function loads data line-by-line from data_path, calls the above
@@ -244,78 +187,54 @@ def data_to_token_ids(data_path, target_path, vocabulary_path,
           tokens_file.write(" ".join([str(tok) for tok in token_ids]) + "\n")
 
 
-def prepare_wmt_data(data_dir, en_vocabulary_size, fr_vocabulary_size, tokenizer=None):
-  """Get WMT data into data_dir, create vocabularies and tokenize data.
+def prepare_iitb_data(data_dir, en_vocabulary_size, hi_vocabulary_size, en_tokenizer, hi_tokenizer):
+  """Get IITB data into data_dir, create vocabularies and tokenize data.
 
   Args:
     data_dir: directory in which the data sets will be stored.
     en_vocabulary_size: size of the English vocabulary to create and use.
-    fr_vocabulary_size: size of the French vocabulary to create and use.
+    hi_vocabulary_size: size of the Hindi vocabulary to create and use.
     tokenizer: a function to use to tokenize each data sentence;
       if None, basic_tokenizer will be used.
 
   Returns:
     A tuple of 6 elements:
       (1) path to the token-ids for English training data-set,
-      (2) path to the token-ids for French training data-set,
+      (2) path to the token-ids for Hindi training data-set,
       (3) path to the token-ids for English development data-set,
-      (4) path to the token-ids for French development data-set,
+      (4) path to the token-ids for Hindi development data-set,
       (5) path to the English vocabulary file,
-      (6) path to the French vocabulary file.
+      (6) path to the Hindi vocabulary file.
   """
-  # Get wmt data to the specified directory.
-  train_path = get_wmt_enfr_train_set(data_dir)
-  dev_path = get_wmt_enfr_dev_set(data_dir)
-
-  from_train_path = train_path + ".en"
-  to_train_path = train_path + ".fr"
-  from_dev_path = dev_path + ".en"
-  to_dev_path = dev_path + ".fr"
+  # Get iitb data to the specified directory.
+  from_train_path = IITB_TRAIN_DIR + ".en"
+  to_train_path = IITB_TRAIN_DIR + ".hi"
+  from_dev_path = IITB_DEV_DIR + ".en"
+  to_dev_path = IITB_DEV_DIR + ".hi"
   return prepare_data(data_dir, from_train_path, to_train_path, from_dev_path, to_dev_path, en_vocabulary_size,
-                      fr_vocabulary_size, tokenizer)
+                      hi_vocabulary_size, en_tokenizer, hi_tokenizer)
 
 
 def prepare_data(data_dir, from_train_path, to_train_path, from_dev_path, to_dev_path, from_vocabulary_size,
-                 to_vocabulary_size, tokenizer=None):
-  """Preapre all necessary files that are required for the training.
+                 to_vocabulary_size, en_tokenizer, hi_tokenizer):
 
-    Args:
-      data_dir: directory in which the data sets will be stored.
-      from_train_path: path to the file that includes "from" training samples.
-      to_train_path: path to the file that includes "to" training samples.
-      from_dev_path: path to the file that includes "from" dev samples.
-      to_dev_path: path to the file that includes "to" dev samples.
-      from_vocabulary_size: size of the "from language" vocabulary to create and use.
-      to_vocabulary_size: size of the "to language" vocabulary to create and use.
-      tokenizer: a function to use to tokenize each data sentence;
-        if None, basic_tokenizer will be used.
-
-    Returns:
-      A tuple of 6 elements:
-        (1) path to the token-ids for "from language" training data-set,
-        (2) path to the token-ids for "to language" training data-set,
-        (3) path to the token-ids for "from language" development data-set,
-        (4) path to the token-ids for "to language" development data-set,
-        (5) path to the "from language" vocabulary file,
-        (6) path to the "to language" vocabulary file.
-    """
   # Create vocabularies of the appropriate sizes.
   to_vocab_path = os.path.join(data_dir, "vocab%d.to" % to_vocabulary_size)
   from_vocab_path = os.path.join(data_dir, "vocab%d.from" % from_vocabulary_size)
-  create_vocabulary(to_vocab_path, to_train_path , to_vocabulary_size, tokenizer)
-  create_vocabulary(from_vocab_path, from_train_path , from_vocabulary_size, tokenizer)
+  create_vocabulary(to_vocab_path, to_train_path , to_vocabulary_size, hi_tokenizer)
+  create_vocabulary(from_vocab_path, from_train_path , from_vocabulary_size, en_tokenizer)
 
   # Create token ids for the training data.
   to_train_ids_path = to_train_path + (".ids%d" % to_vocabulary_size)
   from_train_ids_path = from_train_path + (".ids%d" % from_vocabulary_size)
-  data_to_token_ids(to_train_path, to_train_ids_path, to_vocab_path, tokenizer)
-  data_to_token_ids(from_train_path, from_train_ids_path, from_vocab_path, tokenizer)
+  data_to_token_ids(to_train_path, to_train_ids_path, to_vocab_path, hi_tokenizer)
+  data_to_token_ids(from_train_path, from_train_ids_path, from_vocab_path, en_tokenizer)
 
   # Create token ids for the development data.
   to_dev_ids_path = to_dev_path + (".ids%d" % to_vocabulary_size)
   from_dev_ids_path = from_dev_path + (".ids%d" % from_vocabulary_size)
-  data_to_token_ids(to_dev_path, to_dev_ids_path, to_vocab_path, tokenizer)
-  data_to_token_ids(from_dev_path, from_dev_ids_path, from_vocab_path, tokenizer)
+  data_to_token_ids(to_dev_path, to_dev_ids_path, to_vocab_path, hi_tokenizer)
+  data_to_token_ids(from_dev_path, from_dev_ids_path, from_vocab_path, en_tokenizer)
 
   return (from_train_ids_path, to_train_ids_path,
           from_dev_ids_path, to_dev_ids_path,
