@@ -26,7 +26,7 @@ import tarfile
 from six.moves import urllib
 
 from indicnlp.tokenize import indic_tokenize
-from nltk.tokenize import MosesTokenizer
+from nltk.tokenize.moses import MosesTokenizer
 
 from tensorflow.python.platform import gfile
 import tensorflow as tf
@@ -53,12 +53,12 @@ IITB_DEV_DIR = "./data/dev"
 
 
 def tokenize_hindi(sentence):
-  return indic_tokenize.trivial_tokenize(sentence)
+  return indic_tokenize.trivial_tokenize(sentence.decode('utf-8'))
 
 
 def tokenize_english(sentence):
   tknzr = MosesTokenizer()
-  return tknzr.tokenize(sentence)
+  return tknzr.tokenize(sentence.decode('utf-8'))
 
 
 def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
@@ -187,7 +187,7 @@ def data_to_token_ids(data_path, target_path, vocabulary_path,
           tokens_file.write(" ".join([str(tok) for tok in token_ids]) + "\n")
 
 
-def prepare_iitb_data(data_dir, en_vocabulary_size, hi_vocabulary_size, en_tokenizer, hi_tokenizer):
+def prepare_iitb_data(data_dir, en_vocabulary_size, hi_vocabulary_size):
   """Get IITB data into data_dir, create vocabularies and tokenize data.
 
   Args:
@@ -207,6 +207,8 @@ def prepare_iitb_data(data_dir, en_vocabulary_size, hi_vocabulary_size, en_token
       (6) path to the Hindi vocabulary file.
   """
   # Get iitb data to the specified directory.
+  en_tokenizer = tokenize_english
+  hi_tokenizer = tokenize_hindi
   from_train_path = IITB_TRAIN_DIR + ".en"
   to_train_path = IITB_TRAIN_DIR + ".hi"
   from_dev_path = IITB_DEV_DIR + ".en"
